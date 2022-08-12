@@ -33,7 +33,12 @@ class AddRemainingFieldsInTournament extends Migration
     public function down()
     {
         Schema::table('tournament', function (Blueprint $table) {
-            //
+            $table->dropColumn('country');
+            $table->dropColumn('state');
+            $table->dropColumn('end_date');
+            $table->dropColumn('repeat');
+            $table->dropColumn('category');
+            $table->dropColumn('format');
         });
     }
 }

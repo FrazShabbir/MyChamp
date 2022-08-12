@@ -10,14 +10,15 @@ use App\Models\tournament_players;
 
 class apiController extends Controller
 {
-    public function register(Request $Request){
-    	$response = array();
-        $player_name = host::where('email',$Request->email)->get()->toarray();  
-        //$player_name = host::where('phone',$Request->phone)->orWhere('email',$Request->email)->get()->toarray();  
+    public function register(Request $Request)
+    {
+        $response = array();
+        $player_name = host::where('email', $Request->email)->get()->toarray();
+        //$player_name = host::where('phone',$Request->phone)->orWhere('email',$Request->email)->get()->toarray();
         //return $player_name;
 
         if (empty($player_name)) {
-	    	$player = new host;
+            $player = new host();
             $player->type = $Request['type'];
             $player->name = $Request['name'];
             $player->level = $Request['level'];
@@ -29,116 +30,109 @@ class apiController extends Controller
                 $file = $Request->file('image');
                 $extension = $file->getClientOriginalExtension();
                 $filename = time(). "." . $extension;
-                $file->move('uploads/images/',$filename);
+                $file->move('uploads/images/', $filename);
                 $player->image = $filename;
-            }else{
+            } else {
                 $player->image = "icon.png";
-            } 
+            }
             // $player->image = 'icon.png';
-	        $Result = $player->save();
-	    	if ($Result) {
-	    		$response['success'] = 1;
-				$response["message"]= "Registration successfull"; 
-            	return json_encode($response); 
-
-	    	}else{
-
-	    		$response['success'] = 0;
-				$response["message"]= "Registration Faild"; 
-            	return json_encode($response); 
-	    		
-
-	    	}
-	    }else{
+            $Result = $player->save();
+            if ($Result) {
+                $response['success'] = 1;
+                $response["message"]= "Registration successfull";
+                return json_encode($response);
+            } else {
+                $response['success'] = 0;
+                $response["message"]= "Registration Faild";
+                return json_encode($response);
+            }
+        } else {
             $response['success'] = 0;
-			$response["message"]= "User With This Email  Already Exist"; 
+            $response["message"]= "User With This Email  Already Exist";
             return json_encode($response);
-	    }	
+        }
     }
 
 
 
-    public function player_login(Request $Request){
-  		$response = array();
-     	$player = host::where('email',$Request->email)
-     				->where('password',$Request->password)
-     				->get()->toarray();
+    public function player_login(Request $Request)
+    {
+        $response = array();
+        $player = host::where('email', $Request->email)
+                     ->where('password', $Request->password)
+                     ->get()->toarray();
         if ($player) {
-           	foreach ($player as $row) {
-	            $host["id"] = $row['id'];
-	            $host["type"] = $row['type'];
-	        	$host["name"] = $row['name'];
-	        	$host["email"] = $row['email'];
-	        	$host["password"] = $row['password'];
-	        	$host["phone"] = $row['phone'];
-	        	$host["image"] = $row['image'];
-	        	$host["level"] = $row['level'];
-	        	$host["status"] = $row['status'];
-	        	$host["created_at"] = $row['created_at'];
-	        	$host["updated_at"] = $row['updated_at'];
-			}
+            foreach ($player as $row) {
+                $host["id"] = $row['id'];
+                $host["type"] = $row['type'];
+                $host["name"] = $row['name'];
+                $host["email"] = $row['email'];
+                $host["password"] = $row['password'];
+                $host["phone"] = $row['phone'];
+                $host["image"] = $row['image'];
+                $host["level"] = $row['level'];
+                $host["status"] = $row['status'];
+                $host["created_at"] = $row['created_at'];
+                $host["updated_at"] = $row['updated_at'];
+            }
             if ($host['status'] != '0') {
                 $response["host"] = array();
                 array_push($response["host"], $host);
-    	    	$response['success'] = 1;
-    			$response["message"]= "You are successfully login"; 
-    			return json_encode($response);
-            }else{
-
-                $response['success'] = 0;
-                $response["message"]= "You are disable"; 
+                $response['success'] = 1;
+                $response["message"]= "You are successfully login";
                 return json_encode($response);
-            }                   
-        }else{
-        
-	    	$response['success'] = 0;
-			$response["message"]= "Please enter correct email and password"; 
-            return json_encode($response); 
+            } else {
+                $response['success'] = 0;
+                $response["message"]= "You are disable";
+                return json_encode($response);
+            }
+        } else {
+            $response['success'] = 0;
+            $response["message"]= "Please enter correct email and password";
+            return json_encode($response);
         }
-        
     }
 
 
-    public function player_profile($id){
-  		$response = array();
-    	$player = host::where('id',$id)->get();
-        $count = count( $player );
-                  
-       
-	    if ($count != 0) {
-        	$response["host"] = array();
+    public function player_profile($id)
+    {
+        $response = array();
+        $player = host::where('id', $id)->get();
+        $count = count($player);
 
-        	foreach ($player as $row) {
-	            $host["id"] = $row['id'];
-	            $host["type"] = $row['type'];
-	        	$host["name"] = $row['name'];
-	        	$host["email"] = $row['email'];
-	        	$host["password"] = $row['password'];
-	        	$host["phone"] = $row['phone'];
-	        	$host["image"] = $row['image'];
-	        	$host["level"] = $row['level'];
-	        	$host["status"] = $row['status'];
-	        	$host["created_at"] = $row['created_at'];
-	        	$host["updated_at"] = $row['updated_at'];
+
+        if ($count != 0) {
+            $response["host"] = array();
+
+            foreach ($player as $row) {
+                $host["id"] = $row['id'];
+                $host["type"] = $row['type'];
+                $host["name"] = $row['name'];
+                $host["email"] = $row['email'];
+                $host["password"] = $row['password'];
+                $host["phone"] = $row['phone'];
+                $host["image"] = $row['image'];
+                $host["level"] = $row['level'];
+                $host["status"] = $row['status'];
+                $host["created_at"] = $row['created_at'];
+                $host["updated_at"] = $row['updated_at'];
                 array_push($response["host"], $host);
+            }
 
-			}
-
-    		$response['success'] = 1;
-			$response["message"]= "All users fetched Successfully"; 
-			return json_encode($response);
-	    }else{
-    		$response['success'] = 0;
-			$response["message"]= "Data cannot be exist";
-			return json_encode($response); 	
-	    }
-
- 
+            $response['success'] = 1;
+            $response["message"]= "All users fetched Successfully";
+            return json_encode($response);
+        } else {
+            $response['success'] = 0;
+            $response["message"]= "Data cannot be exist";
+            return json_encode($response);
+        }
     }
 
-    public function update_player(Request $Request ,$id){
-    	$response = array();
-    	$player = host::find($id);
+    public function update_player(Request $Request, $id)
+    {
+        $response = array();
+        $player = host::find($id);
         $player->type = $Request['type'];
         $player->name = $Request['name'];
         $player->level = $Request['level'];
@@ -151,48 +145,44 @@ class apiController extends Controller
             $file = $Request->file('image');
             $extension = $file->getClientOriginalExtension();
             $filename = time(). "." . $extension;
-            $file->move('uploads/images/',$filename);
+            $file->move('uploads/images/', $filename);
             $player->image = $filename;
-        }else{
+        } else {
             $player->image = $player->image;
-        } 
+        }
         $Result = $player->save();
-    	if ($Result) {
-    		$response['success'] = 1;
-			$response["message"]= "Successfully updated"; 
-        	return json_encode($response); 
-
-    	}else{
-
-    		$response['success'] = 0;
-			$response["message"]= "Update Faild"; 
-        	return json_encode($response); 
-    		
-
-    	}
-	    	
+        if ($Result) {
+            $response['success'] = 1;
+            $response["message"]= "Successfully updated";
+            return json_encode($response);
+        } else {
+            $response['success'] = 0;
+            $response["message"]= "Update Faild";
+            return json_encode($response);
+        }
     }
 
 
 
-    public function insert_tournament(Request $Request){
-            
-            $response = array();
-            
-            $tournament = new tournament;
+    public function insert_tournament(Request $Request)
+    {
+        $response = array();
+        $host = host::find($Request['host_id']);
+        if ($host) {
+
+            $tournament = new tournament();
             $tournament->name = $Request['name'];  // Title
             $tournament->venue = $Request['venue']; // vanue
-// country
-//state
-$tournament->date = $Request['date']; //start_date
-$tournament->start_time = $Request['start_time']; //start_time
- //end_date
-$tournament->end_time = $Request['end_time']; //end_time
-// repeat
-//category
-//format
-$tournament->description = $Request['description']; //additional information
-
+            $tournament->country = $Request['country'];// country
+            $tournament->state = $Request['state'];//state
+            $tournament->date = $Request['date']; //start_date
+            $tournament->start_time = $Request['start_time']; //start_time
+            $tournament->end_date = $Request['end_date'];//end_date
+            $tournament->end_time = $Request['end_time']; //end_time
+            $tournament->repeat = $Request['repeat'];// repeat
+            $tournament->category = $Request['category'];//category
+            $tournament->format = $Request['format'];//format
+            $tournament->description = $Request['description']; //additional information
             $tournament->host_id = $Request['host_id']; //host_id
             $host = host::find($tournament->host_id);
             $tournament->status = '0';
@@ -200,154 +190,159 @@ $tournament->description = $Request['description']; //additional information
             $Result = $tournament->save();
             if ($Result) {
                 $response['success'] = 1;
-                $response["message"]= "Tournament add successfull"; 
-                return json_encode($response); 
-
-            }else{
-
+                $response["message"]= "Tournament add successfull";
+                return json_encode($response);
+            } else {
                 $response['success'] = 0;
-                $response["message"]= "Tournament adding Faild"; 
-                return json_encode($response); 
-                
-
+                $response["message"]= "Tournament adding Faild";
+                return json_encode($response);
             }
-           
-         
+
+        } else {
+            $response['success'] = 0;
+            $response["message"]= "No host Found";
+            return json_encode($response);
+        }
+
     }
 
 
 
-    public function host_tournament($id){
+    public function host_tournament($id)
+    {
         $response = array();
         $tournament = tournament::select('*')
-                    ->where('host_id','=', $id)
+                    ->where('host_id', '=', $id)
                     ->get();
-        $count = count( $tournament );
-                    
+        $count = count($tournament);
+
         if ($count != 0) {
             $response["data"] = array();
 
             foreach ($tournament as $row) {
                 $data["id"] = $row['id'];
+                $data["host_id"] = $row['host_id'];
+                $data["host_name"] = $row['host_name'];
                 $data["name"] = $row['name'];
                 $data["description"] = $row['description'];
-                $data["host_id"] = $row['host_id'];
+                $data["country"] = $row['country'];
+                $data["state"] = $row['state'];
                 $data["date"] = $row['date'];
                 $data["start_time"] = $row['start_time'];
+                $data["end_date"] = $row['end_date'];
                 $data["end_time"] = $row['end_time'];
                 $data["venue"] = $row['venue'];
-                $data["host_name"] = $row['host_name'];
+                $data["repeat"] = $row['repeat'];
+                $data["category"] = $row['category'];
+                $data["format"] = $row['format'];
                 $data["status"] = $row['status'];
                 $data["created_at"] = $row['created_at'];
                 $data["updated_at"] = $row['updated_at'];
                 array_push($response["data"], $data);
-
             }
 
             $response['success'] = 1;
-            $response["message"]= "All users fetch Successfully"; 
+            $response["message"]= "All Tournaments fetched Successfully";
             return json_encode($response);
-        }else{
+        } else {
             $response['success'] = 0;
-            $response["message"]= "Data cannot be exist";
-            return json_encode($response);  
+            $response["message"]= "No Data Found";
+            return json_encode($response);
         }
-
- 
     }
 
 
-    public function tournaments(){
+    public function tournaments()
+    {
         $response = array();
         $tournament = tournament::all();
-        $count = count( $tournament );
-                    
+        $count = count($tournament);
+
         if ($count != 0) {
             $response["data"] = array();
 
             foreach ($tournament as $row) {
                 $data["id"] = $row['id'];
-                $data["name"] = $row['name'];
-                $data["description"] = $row['description'];    
                 $data["host_id"] = $row['host_id'];
+                $data["host_name"] = $row['host_name'];
+                $data["name"] = $row['name'];
+                $data["description"] = $row['description'];
+                $data["country"] = $row['country'];
+                $data["state"] = $row['state'];
                 $data["date"] = $row['date'];
-                
                 $data["start_time"] = $row['start_time'];
+                $data["end_date"] = $row['end_date'];
                 $data["end_time"] = $row['end_time'];
                 $data["venue"] = $row['venue'];
-                $data["host_name"] = $row['host_name'];
+                $data["repeat"] = $row['repeat'];
+                $data["category"] = $row['category'];
+                $data["format"] = $row['format'];
                 $data["status"] = $row['status'];
                 $data["created_at"] = $row['created_at'];
                 $data["updated_at"] = $row['updated_at'];
                 array_push($response["data"], $data);
-
             }
 
             $response['success'] = 1;
-            $response["message"]= "All users fetch Successfully"; 
+            $response["message"]= "All users fetch Successfully";
             return json_encode($response);
-        }else{
+        } else {
             $response['success'] = 0;
             $response["message"]= "Data cannot be exist";
-            return json_encode($response);  
+            return json_encode($response);
         }
-
- 
     }
 
 
 
-    public function insert_tournament_players(Request $Request){   
-            $response = array();
-            $tournament_players = tournament_players::where('tournament_id',$Request->tournament_id)
-                    ->where('player_id',$Request->player_id)
+    public function insert_tournament_players(Request $Request)
+    {
+        $response = array();
+        $tournament_players = tournament_players::where('tournament_id', $Request->tournament_id)
+                    ->where('player_id', $Request->player_id)
                     ->get()->toarray();
-            $count = count($tournament_players);        
-            if ($count == 0) {    
-                $host = host::find($Request['player_id']);
-                $player = new tournament_players;
-                $player->name = $host->name;
-                $player->tournament_id = $Request['tournament_id'];
-                $player->player_id = $Request['player_id'];
-                $player->email = $host->email;
-                // $player->password = $host->password;
-                $player->phone = $host->phone;
-                $player->image = $host->image;
-                $player->level = $host->level;  
-                $Result = $player->save();
-                if ($Result) {
-                    $notification = new notification;
-                    $notification->title = "My Champ";
-                    $notification->receiver_name = $host->name;
-                    $notification->receiver_id = $Request['player_id'];
-                    $notification->body = "You have invited for new tournament for more details please check My Champ app.";
-                    $notification->date = date("Y-m-d");
-                    $notification->save();
-                    if ($notification) {
-                        $this->notification($notification);
-                    }
-                    $response['success'] = 1;
-                    $response["message"]= "Player add in tournament successfully"; 
-                    return json_encode($response); 
-
-                }else{
-
-                    $response['success'] = 0;
-                    $response["message"]= "Player add in tournament Faild"; 
-                    return json_encode($response); 
-                    
+        $count = count($tournament_players);
+        if ($count == 0) {
+            $host = host::find($Request['player_id']);
+            $player = new tournament_players();
+            $player->name = $host->name;
+            $player->tournament_id = $Request['tournament_id'];
+            $player->player_id = $Request['player_id'];
+            $player->email = $host->email;
+            // $player->password = $host->password;
+            $player->phone = $host->phone;
+            $player->image = $host->image;
+            $player->level = $host->level;
+            $Result = $player->save();
+            if ($Result) {
+                $notification = new notification();
+                $notification->title = "My Champ";
+                $notification->receiver_name = $host->name;
+                $notification->receiver_id = $Request['player_id'];
+                $notification->body = "You have invited for new tournament for more details please check My Champ app.";
+                $notification->date = date("Y-m-d");
+                $notification->save();
+                if ($notification) {
+                    $this->notification($notification);
                 }
-            }else{
+                $response['success'] = 1;
+                $response["message"]= "Player add in tournament successfully";
+                return json_encode($response);
+            } else {
                 $response['success'] = 0;
-                $response["message"]= "Player is already exist"; 
-                return json_encode($response); 
-                
-            }    
-         
+                $response["message"]= "Player add in tournament Faild";
+                return json_encode($response);
+            }
+        } else {
+            $response['success'] = 0;
+            $response["message"]= "Player is already exist";
+            return json_encode($response);
+        }
     }
 
 
-    public function player_tournaments(Request $Request){
+    public function player_tournaments(Request $Request)
+    {
         $response = array();
         // $tournament_players = tournament_players::join("tournament", function ($join) {
         //     $join->on("tournament.id", "=", "tournament_id");
@@ -355,26 +350,24 @@ $tournament->description = $Request['description']; //additional information
         // $count = count($tournament_players);
 
         $tournament_players = tournament_players::select('*')
-                    ->where('player_id','=', $Request['player_id'])
+                    ->where('player_id', '=', $Request['player_id'])
                     ->get();
         $date = $Request['date'];
-        $index = 0;  
-        $response["data"] = array();          
+        $index = 0;
+        $response["data"] = array();
         foreach ($tournament_players as $player) {
-           
             if ($date == "date") {
-                $tournament_id = $player->tournament_id; 
+                $tournament_id = $player->tournament_id;
                 $tournament = tournament::select('*')
-                                ->where('id','=', $tournament_id)
-                                ->get();   
-            }else{
-
-                $tournament_id = $player->tournament_id; 
-                $tournament = tournament::where('date',$date)
-                                    ->where('id',$tournament_id)
+                                ->where('id', '=', $tournament_id)
+                                ->get();
+            } else {
+                $tournament_id = $player->tournament_id;
+                $tournament = tournament::where('date', $date)
+                                    ->where('id', $tournament_id)
                                     ->get()->toarray();
             }
-            
+
             foreach ($tournament as $row) {
                 $data["id"] = $row['id'];
                 $data["name"] = $row['name'];
@@ -389,33 +382,32 @@ $tournament->description = $Request['description']; //additional information
                 $data["created_at"] = $row['created_at'];
                 $data["updated_at"] = $row['updated_at'];
                 array_push($response["data"], $data);
-            }  
+            }
             if ($index == count($tournament_players)-1) {
                 $response['success'] = 1;
-                $response["message"]= "Player tournaments fetch Successfully"; 
-                return json_encode($response);   
-            }    
-            $index++;         
-    
-        }     
- 
+                $response["message"]= "Player tournaments fetch Successfully";
+                return json_encode($response);
+            }
+            $index++;
+        }
     }
 
 
 
-     public function player_add_tournaments(Request $Request){
+    public function player_add_tournaments(Request $Request)
+    {
         $response = array();
         $tournament_players = tournament_players::select('*')
-                    ->where('player_id','=', $Request['player_id'])
+                    ->where('player_id', '=', $Request['player_id'])
                     ->get();
-        $index = 0;  
-        $response["data"] = array();          
+        $index = 0;
+        $response["data"] = array();
         foreach ($tournament_players as $player) {
-            $tournament_id = $player->tournament_id; 
+            $tournament_id = $player->tournament_id;
             $tournament = tournament::select('*')
-                            ->where('id','=', $tournament_id)
+                            ->where('id', '=', $tournament_id)
                             ->get();
-            
+
             foreach ($tournament as $row) {
                 $data["id"] = $row['id'];
                 $data["name"] = $row['name'];
@@ -430,24 +422,24 @@ $tournament->description = $Request['description']; //additional information
                 $data["created_at"] = $row['created_at'];
                 $data["updated_at"] = $row['updated_at'];
                 array_push($response["data"], $data);
-            }  
+            }
             if ($index == count($tournament_players)-1) {
                 $response['success'] = 1;
-                $response["message"]= "Player tournaments fetch Successfully"; 
-                return json_encode($response);   
-            }    
-            $index++;         
-        }     
- 
+                $response["message"]= "Player tournaments fetch Successfully";
+                return json_encode($response);
+            }
+            $index++;
+        }
     }
 
 
-    public function tournaments_players($id){
+    public function tournaments_players($id)
+    {
         $response = array();
         $player = tournament_players::join("host", function ($join) {
             $join->on("host.id", "=", "player_id");
         })->where('tournament_id', $id)->get();
-    
+
         $count = count($player);
         if ($count != 0) {
             $response["data"] = array();
@@ -466,62 +458,61 @@ $tournament->description = $Request['description']; //additional information
                 array_push($response["data"], $data);
             }
             $response['success'] = 1;
-            $response["message"]= "All players fetch Successfully"; 
+            $response["message"]= "All players fetch Successfully";
             return json_encode($response);
-        }else{
+        } else {
             $response['success'] = 0;
             $response["message"]= "Data cannot be exist";
-            return json_encode($response);  
+            return json_encode($response);
         }
-        
     }
 
 
 
-    public function free_players($id){
-         $response = array();
-            $response["data"] = array();
+    public function free_players($id)
+    {
+        $response = array();
+        $response["data"] = array();
 
-            $host = host::select('*')
-                    ->where('type','=', 'player')
+        $host = host::select('*')
+                    ->where('type', '=', 'player')
                     ->get();
-            $i = 0;
-            foreach ($host as $row) {
-             $tournament_players = tournament_players::select('*')
-                    ->where('tournament_id','=', $id)
-                    ->where('player_id','=', $row->id)
+        $i = 0;
+        foreach ($host as $row) {
+            $tournament_players = tournament_players::select('*')
+                    ->where('tournament_id', '=', $id)
+                    ->where('player_id', '=', $row->id)
                     ->get();
-               $count = count($tournament_players);       
-                if ($count < 1) {
-                    $data["id"] = $row['id'];
-                    $data["type"] = $row['type'];
-                    $data["name"] = $row['name'];
-                    $data["email"] = $row['email'];
-                    $data["password"] = $row['password'];
-                    $data["phone"] = $row['phone'];
-                    $data["image"] = $row['image'];
-                    $data["level"] = $row['level'];
-                    $data["status"] = $row['status'];
-                    $data["created_at"] = $row['created_at'];
-                    $data["updated_at"] = $row['updated_at'];
-                    array_push($response['data'], $data);
-                }
-                if ($i == count($host)-1) {
-                  
-                    $response['success'] = 1;
-                    $response["message"]= "All players fetch Successfully"; 
-                    return json_encode($response);
-                    }
-                $i++;
+            $count = count($tournament_players);
+            if ($count < 1) {
+                $data["id"] = $row['id'];
+                $data["type"] = $row['type'];
+                $data["name"] = $row['name'];
+                $data["email"] = $row['email'];
+                $data["password"] = $row['password'];
+                $data["phone"] = $row['phone'];
+                $data["image"] = $row['image'];
+                $data["level"] = $row['level'];
+                $data["status"] = $row['status'];
+                $data["created_at"] = $row['created_at'];
+                $data["updated_at"] = $row['updated_at'];
+                array_push($response['data'], $data);
             }
-        
+            if ($i == count($host)-1) {
+                $response['success'] = 1;
+                $response["message"]= "All players fetch Successfully";
+                return json_encode($response);
+            }
+            $i++;
+        }
     }
 
 
 
 
 
-    public function notification($notification){
+    public function notification($notification)
+    {
         $url = 'https://fcm.googleapis.com/fcm/send';
 
         // Put your Server Key here
@@ -549,9 +540,10 @@ $tournament->description = $Request['description']; //additional information
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($apiBody));
-        curl_setopt($ch,
+        curl_setopt(
+            $ch,
             CURLOPT_SSL_VERIFYPEER,
-            FALSE
+            false
         );
 
         // Execute call and save result
@@ -563,7 +555,4 @@ $tournament->description = $Request['description']; //additional information
         // return $result;
         return redirect()->back();
     }
-
-
-
 }
