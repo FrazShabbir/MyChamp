@@ -9,110 +9,106 @@ use App\Models\tournament_players;
 use App\Models\notification;
 use Illuminate\Support\Facades\File;
 
-
 class indexController extends Controller
 {
-
-                                    // Show dashbord
-    public function dashbord(){ 
-      
+    // Show dashbord
+    public function dashbord()
+    {
         if (session()->get('name')) {
             $player = host::select('*')
-                    ->where('type','=', "player")
+                    ->where('type', '=', "player")
                     ->get();
             $host = host::select('*')
-                    ->where('type','=', "host")
+                    ->where('type', '=', "host")
                     ->get();
             $accepted = tournament::select('*')
-                    ->where('status','=', '1')
+                    ->where('status', '=', '1')
                     ->get();
             $declined = tournament::select('*')
-                    ->where('status','=', '0')
-                    ->get();                        
+                    ->where('status', '=', '0')
+                    ->get();
             $host_count = count($host);
             $player_count = count($player);
             $accepted_count = count($accepted);
             $declined_count = count($declined);
-                    
-            $data = compact('host_count','player_count','accepted_count', 'declined_count');               
-    	   return view('index')->with($data);
-        }else{
-           return redirect('/');
 
+            $data = compact('host_count', 'player_count', 'accepted_count', 'declined_count');
+            return view('index')->with($data);
+        } else {
+            return redirect('/');
         }
     }
 
-                                       // player session start 
+    // player session start
 
-                                    // Show player Table
+    // Show player Table
 
-    public function players(){
+    public function players()
+    {
         if (session()->get('name')) {
-           $player = host::select('*')
-                    ->where('type','=', "player")
-                    ->get(); 
-           $data = compact('player');     
-           return view('players')->with($data);
-        }else{
-           return redirect('/');
-
+            $player = host::select('*')
+                    ->where('type', '=', "player")
+                    ->get();
+            $data = compact('player');
+            return view('players')->with($data);
+        } else {
+            return redirect('/');
         }
     }
 
-                                    // add player form
+    // add player form
 
-    public function add_player(){
+    public function add_player()
+    {
         if (session()->get('name')) {
-    	   return view('add_player');
-        }else{
-           return redirect('/');
-
+            return view('add_player');
+        } else {
+            return redirect('/');
         }
     }
 
 
 
 
-    public function delete_notification(Request $Request){
-         if (session()->get('name')) {
+    public function delete_notification(Request $Request)
+    {
+        if (session()->get('name')) {
             $id = $Request['id'];
             $notification = notification::find($id);
             $notification->delete();
             toastr()->success('Notification is successfully deleted!');
             return redirect()->back();
-            
-        }else{
-           return redirect('/');
-
+        } else {
+            return redirect('/');
         }
     }
 
 
 
-    public function delete_tournament_players(Request $Request){
-         if (session()->get('name')) {
+    public function delete_tournament_players(Request $Request)
+    {
+        if (session()->get('name')) {
             $id = $Request['id'];
             $tournament_players = tournament_players::find($id);
             $tournament_players->delete();
             toastr()->success('Player is successfully deleted!');
             return redirect()->back();
-            
-        }else{
-           return redirect('/');
-
+        } else {
+            return redirect('/');
         }
     }
 
 
 
 
-                                    // insert player 
+    // insert player
 
-    public function insert_player(Request $Request){
+    public function insert_player(Request $Request)
+    {
         if (session()->get('name')) {
-            $player_name = host::where('email',$Request->email)->where('phone',$Request->phone)->get()->toarray();  
+            $player_name = host::where('email', $Request->email)->where('phone', $Request->phone)->get()->toarray();
             if (empty($player_name)) {
-                $player = new host;
+                $player = new host();
                 $player->type = "player";
                 $player->name = $Request['name'];
                 $player->level = $Request['level'];
@@ -124,43 +120,41 @@ class indexController extends Controller
                     $file = $Request->file('image');
                     $extension = $file->getClientOriginalExtension();
                     $filename = time(). "." . $extension;
-                    $file->move('uploads/images/',$filename);
+                    $file->move('uploads/images/', $filename);
                     $player->image = $filename;
-                }else{
+                } else {
                     $player->image = "icon.png";
-                }    
-                $player->save(); 
+                }
+                $player->save();
                 toastr()->success('Player successfully inserted');
                 return redirect('/players');
-            }else{
+            } else {
                 toastr()->error('Email is already exixt!');
                 return redirect()->back();
             }
-               
-        }else{
-           return redirect('/');
-
+        } else {
+            return redirect('/');
         }
     }
 
-                                // show edite player function
+    // show edite player function
 
-    public function edite_player($id){
+    public function edite_player($id)
+    {
         if (session()->get('name')) {
             $player = host::find($id);
             $data = compact('player');
-           return view('edite_player')->with($data);
-        }else{
-           return redirect('/');
-
+            return view('edite_player')->with($data);
+        } else {
+            return redirect('/');
         }
     }
 
-                                // Update player function
+    // Update player function
 
-    public function update_player(Request $Request, $id){
+    public function update_player(Request $Request, $id)
+    {
         if (session()->get('name')) {
-        
             $host = host::find($id);
             $host->type = "player";
             $host->name = $Request['name'];
@@ -173,69 +167,66 @@ class indexController extends Controller
                 $file = $Request->file('image');
                 $extension = $file->getClientOriginalExtension();
                 $filename = time(). "." . $extension;
-                
+
                 $discription = 'uploads/images/'.$host->image;
                 if (File::exists($discription)) {
-                    
                     File::delete($discription);
                 }
-                $file->move('uploads/images/',$filename);
+                $file->move('uploads/images/', $filename);
                 $host->image = $filename;
-
-            }else{
+            } else {
                 $host->image = $host->image;
             }
-            
+
             $host->save();
             toastr()->success('Player successfully updated');
             return redirect('/players');
-            
-        }else{
-           return redirect('/');
-
+        } else {
+            return redirect('/');
         }
     }
 
-                                       //End player session Functions 
-    
-                                // start hostb session functions
+    //End player session Functions
+
+    // start hostb session functions
 
 
 
-                                // show host table function
+    // show host table function
 
-    public function hosts(){
+    public function hosts()
+    {
         if (session()->get('name')) {
-    	   $host = host::select('*')
-                    ->where('type','=', "host")
-                    ->get(); 
-           $data = compact('host');         
-           return view('hosts')->with($data);
-        }else{
-           return redirect('/');
-
+            $host = host::select('*')
+                    ->where('type', '=', "host")
+                    ->get();
+            $data = compact('host');
+            return view('hosts')->with($data);
+        } else {
+            return redirect('/');
         }
     }
 
-                                // show add form function
+    // show add form function
 
-    public function add_host(){
+    public function add_host()
+    {
         if (session()->get('name')) {
-    	   return view('add_host');
-        }else{
-           return redirect('/');
-
+            return view('add_host');
+        } else {
+            return redirect('/');
         }
     }
 
-                                // insert host  function
+    // insert host  function
 
-    public function insert_host(Request $Request){
+    public function insert_host(Request $Request)
+    {
         if (session()->get('name')) {
-            $host_name = host::where('email',$Request->email)->where('phone',$Request->phone)->get()->toarray();  
-            $count = count($host_name); 
+            $host_name = host::where('email', $Request->email)->where('phone', $Request->phone)->get()->toarray();
+            $count = count($host_name);
             if ($count == 0) {
-                $host = new host;
+                $host = new host();
                 $host->type = "host";
                 $host->name = $Request['name'];
                 $host->level = $Request['level'];
@@ -247,44 +238,41 @@ class indexController extends Controller
                     $file = $Request->file('image');
                     $extension = $file->getClientOriginalExtension();
                     $filename = time(). "." . $extension;
-                    $file->move('uploads/images/',$filename);
+                    $file->move('uploads/images/', $filename);
                     $host->image = $filename;
-                }else{
+                } else {
                     $host->image = "icon.png";
-                }     
+                }
                 $host->save();
                 toastr()->success('Host successfully inserted');
                 return redirect('/hosts');
-            }else{
+            } else {
                 toastr()->error('Email is already exixt!');
                 return redirect()->back();
-
             }
-               
-        }else{
-           return redirect('/');
-
+        } else {
+            return redirect('/');
         }
     }
 
-                                // show edite host form function
+    // show edite host form function
 
-    public function edite_host($id){
+    public function edite_host($id)
+    {
         if (session()->get('name')) {
             $host = host::find($id);
             $data = compact('host');
-           return view('edite_host')->with($data);
-        }else{
-           return redirect('/');
-
+            return view('edite_host')->with($data);
+        } else {
+            return redirect('/');
         }
     }
 
-                                // Update host function
+    // Update host function
 
-    public function update_host(Request $Request, $id){
+    public function update_host(Request $Request, $id)
+    {
         if (session()->get('name')) {
-        
             $host = host::find($id);
             $host->type = "host";
             $host->name = $Request['name'];
@@ -297,36 +285,34 @@ class indexController extends Controller
                 $file = $Request->file('image');
                 $extension = $file->getClientOriginalExtension();
                 $filename = time(). "." . $extension;
-                
+
                 $discription = 'uploads/images/'.$host->image;
                 if (File::exists($discription)) {
-                    
                     File::delete($discription);
                 }
-                $file->move('uploads/images/',$filename);
+                $file->move('uploads/images/', $filename);
                 $host->image = $filename;
-
-            }else{
+            } else {
                 $host->image = $host->image;
             }
             $host->save();
             toastr()->success('Host successfully updated!');
-            return redirect('/hosts');            
-        }else{
-           return redirect('/');
-
+            return redirect('/hosts');
+        } else {
+            return redirect('/');
         }
     }
 
-                                // end Host session
+    // end Host session
 
-                                // aproved host and player
+    // aproved host and player
 
-    public function aproved(Request $Request){
+    public function aproved(Request $Request)
+    {
         if (session()->get('name')) {
             $id = $Request['id'];
             $host = host::find($id);
-            
+
             $host->type = $host->type;
             $host->name = $host->name;
             $host->level = $host->level;
@@ -334,77 +320,70 @@ class indexController extends Controller
             $host->password = $host->password;
             $host->phone = $host->phone;
             if ($host->status == 0) {
-                $host->status = 1;    
-            }else{
-
-                $host->status = 0;    
+                $host->status = 1;
+            } else {
+                $host->status = 0;
             }
 
             $host->image = $host->image;
-           
+
             $host->save();
             toastr()->success('Your are successfully change the status');
             return redirect()->back();
-            
-        }else{
-           return redirect('/');
-
+        } else {
+            return redirect('/');
         }
     }
 
-                                // delete host and player
+    // delete host and player
 
-    public function delete_host(Request $Request){
+    public function delete_host(Request $Request)
+    {
         if (session()->get('name')) {
-        
-            
             $id = $Request['id'];
             $host = host::find($id);
             $discription = 'uploads/images/'.$host->image;
             if (File::exists($discription)) {
-                
                 File::delete($discription);
             }
             $host->delete();
             toastr()->success('Player is successfully deleted!');
             return redirect()->back();
-            
-        }else{
-           return redirect('/');
-
+        } else {
+            return redirect('/');
         }
     }
 
 
-    public function tournament(){
+    public function tournament()
+    {
         if (session()->get('name')) {
             $tournament = tournament::all();
             $data = compact('tournament');
-    	   return view('tournament')->with($data);
-        }else{
-           return redirect('/');
-
+            return view('tournament')->with($data);
+        } else {
+            return redirect('/');
         }
     }
 
-    public function add_tournament(){
+    public function add_tournament()
+    {
         if (session()->get('name')) {
             $host = host::select('*')
-                    ->where('type','=', "host")
+                    ->where('type', '=', "host")
                     ->get();
             $data = compact('host');
-    	    return view('add_tournament')->with($data);
-        }else{
-           return redirect('/');
-
+            return view('add_tournament')->with($data);
+        } else {
+            return redirect('/');
         }
     }
 
 
-    public function insert_tournament(Request $Request){
+    public function insert_tournament(Request $Request)
+    {
         if (session()->get('name')) {
-           
-            $tournament = new tournament;
+            $tournament = new tournament();
             $tournament->name = $Request['name'];
             $tournament->description = $Request['description'];
             $tournament->host_id = $Request['host_id'];
@@ -418,37 +397,37 @@ class indexController extends Controller
             $tournament->save();
             toastr()->success('Add tournament successfully!');
             return redirect('/tournament');
-        }else{
-           return redirect('/');
-
+        } else {
+            return redirect('/');
         }
     }
 
 
 
-    public function asign_players(){
+    public function asign_players()
+    {
         if (session()->get('name')) {
-    	   return view('asign_players');
-        }else{
-           return redirect('/');
-
+            return view('asign_players');
+        } else {
+            return redirect('/');
         }
     }
 
 
-    public function fetch_notification(){
+    public function fetch_notification()
+    {
         if (session()->get('name')) {
-           $notification = notification::all();
-           $data = compact('notification'); 
-    	   return view('notification')->with($data);
-        }else{
-           return redirect('/');
-
+            $notification = notification::all();
+            $data = compact('notification');
+            return view('notification')->with($data);
+        } else {
+            return redirect('/');
         }
     }
 
 
-    public function tournament_accepted(Request $Request){
+    public function tournament_accepted(Request $Request)
+    {
         if (session()->get('name')) {
             $id = $Request['id'];
             $tournament = tournament::find($id);
@@ -462,60 +441,75 @@ class indexController extends Controller
             $tournament->end_time = $tournament->end_time;
             $tournament->venue = $tournament->venue;
             if ($tournament->status == 0) {
-                $tournament->status = 1;    
-            }else{
-
-                $tournament->status = 0;    
+                $tournament->status = 1;
+            } else {
+                $tournament->status = 0;
             }
             // $tournament->status = '1';
             $tournament->host_name = $tournament->host_name;
             toastr()->success('Your successfully change tournament status');
 
             $tournament->save();
-              return redirect()->back();
-            
-        }else{
-           return redirect('/');
+            return redirect()->back();
+        } else {
+            return redirect('/');
+        }
+    }
 
+    public function show_tournament($id)
+    {
+        // dd('j');
+        if (session()->get('name')) {
+            $tournament = tournament::find($id);
+
+         
+            return view('show_tournament')
+            ->with('tournament', $tournament);
+           
+            
+        } else {
+            return redirect('/');
         }
     }
 
 
-    public function tournament_players($id){
+
+    public function tournament_players($id)
+    {
         if (session()->get('name')) {
             if ($id != '0') {
-                $tournament = tournament::all();        
+                $tournament = tournament::all();
                 $tournament_players = tournament_players::select('*')
-                        ->where('tournament_id','=', $id)
-                        ->get();  
-                $data = compact('tournament_players','id','tournament');     
+                        ->where('tournament_id', '=', $id)
+                        ->get();
+                $data = compact('tournament_players', 'id', 'tournament');
                 return view('tournament_players')->with($data);
-            }else{
-                $tournament = tournament::all();        
-                $tournament_players = tournament_players::all();  
-                $data = compact('tournament_players','id','tournament');     
+            } else {
+                $tournament = tournament::all();
+                $tournament_players = tournament_players::all();
+                $data = compact('tournament_players', 'id', 'tournament');
                 return view('tournament_players')->with($data);
-            }    
-        }else{
-           return redirect('/');
-
+            }
+        } else {
+            return redirect('/');
         }
     }
 
 
-    public function add_tournament_players($id){
-         if (session()->get('name')) {
+    public function add_tournament_players($id)
+    {
+        if (session()->get('name')) {
             $player = array();
             $host = host::select('*')
-                    ->where('type','=', 'player')
+                    ->where('type', '=', 'player')
                     ->get();
             $i = 0;
             foreach ($host as $row) {
-             $tournament_players = tournament_players::select('*')
-                    ->where('tournament_id','=', $id)
-                    ->where('player_id','=', $row->id)
+                $tournament_players = tournament_players::select('*')
+                    ->where('tournament_id', '=', $id)
+                    ->where('player_id', '=', $row->id)
                     ->get();
-               $count = count($tournament_players);       
+                $count = count($tournament_players);
                 if ($count < 1) {
                     $data["id"] = $row['id'];
                     $data["type"] = $row['type'];
@@ -531,31 +525,28 @@ class indexController extends Controller
                     array_push($player, $data);
                 }
                 if ($i == count($host)-1) {
-                  
-                        $data1 = compact('player','id','tournament_players');     
-                        return view('add_tournament_player')->with($data1);
-                    }
+                    $data1 = compact('player', 'id', 'tournament_players');
+                    return view('add_tournament_player')->with($data1);
+                }
                 $i++;
             }
-
-        }else{
+        } else {
             return redirect('/');
-
         }
     }
 
-    public function insert_tournament_players(Request $Request, $tournament_id){
+    public function insert_tournament_players(Request $Request, $tournament_id)
+    {
         if (session()->get('name')) {
             $id = $Request['id'];
             if (!empty($id)) {
-
-                for ($i=0; $i < count($id); $i++) {  
+                for ($i=0; $i < count($id); $i++) {
                     $ide =  $id[$i];
                     $host = host::find($ide);
                     // echo "<pre>";
                     // print_r($host->toarray());
 
-                    $player = new tournament_players;
+                    $player = new tournament_players();
                     $player->name = $host->name;
                     $player->tournament_id = $tournament_id;
                     $player->player_id = $ide;
@@ -566,7 +557,7 @@ class indexController extends Controller
                     $player->level = $host->level;
                     $player->save();
                     if ($player) {
-                        $notification = new notification;
+                        $notification = new notification();
                         $notification->title = "My Champ";
                         $notification->receiver_name = $host->name;
                         $notification->receiver_id = $ide;
@@ -577,21 +568,19 @@ class indexController extends Controller
                             $this->notification($notification);
                         }
                     }
-                 }
+                }
                 toastr()->success('Add players in tournament successfully!');
-                 
-             }    
+            }
 
-                return redirect()->back();
-                
-        }else{
+            return redirect()->back();
+        } else {
             return redirect('/');
-
         }
     }
 
 
-    public function notification($notification){
+    public function notification($notification)
+    {
         $url = 'https://fcm.googleapis.com/fcm/send';
 
         // Put your Server Key here
@@ -619,9 +608,10 @@ class indexController extends Controller
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($apiBody));
-        curl_setopt($ch,
+        curl_setopt(
+            $ch,
             CURLOPT_SSL_VERIFYPEER,
-            FALSE
+            false
         );
 
         // Execute call and save result
@@ -633,7 +623,4 @@ class indexController extends Controller
         // return $result;
         return redirect()->back();
     }
-    
-
-
 }

@@ -123,8 +123,10 @@ Route::post('/tournament_accepted',[indexController::class,'tournament_accepted'
 
 
 
+Route::get('/tournament/{id}',[indexController::class,'show_tournament'])->name('tournament.show');
 
 Route::get('/tournament_players/{id}',[indexController::class,'tournament_players']);
+
 Route::get('/add_tournament_players/{id}',[indexController::class,'add_tournament_players']);
 // Route::get('/insert_tournament_players/{id}/{tournament_id}',[indexController::class,'insert_tournament_players']);
 Route::post('/insert_tournament_players/{tournament_id}',[indexController::class,'insert_tournament_players']);
