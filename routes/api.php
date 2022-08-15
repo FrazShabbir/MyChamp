@@ -35,6 +35,8 @@ Route::post("update_player/{id}", [apicontroller::class, "update_player"]);
 
 
 Route::post('/add_tournament',[apiController::class,'insert_tournament']);
+Route::post('/tournament/{id}/delete',[apiController::class,'delete_tournament'])->name('tournament.delete');
+Route::put('/tournament/{id}/edit',[apiController::class,'edit_tournament'])->name('tournament.edit');
 
 Route::get('/host_tournament/{id}',[apiController::class,'host_tournament']);
 

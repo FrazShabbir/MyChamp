@@ -169,7 +169,6 @@ class apiController extends Controller
         $response = array();
         $host = host::find($Request['host_id']);
         if ($host) {
-
             $tournament = new tournament();
             $tournament->name = $Request['name'];  // Title
             $tournament->venue = $Request['venue']; // vanue
@@ -197,15 +196,67 @@ class apiController extends Controller
                 $response["message"]= "Tournament adding Faild";
                 return json_encode($response);
             }
-
         } else {
             $response['success'] = 0;
             $response["message"]= "No host Found";
             return json_encode($response);
         }
+    }
+    public function edit_tournament(Request $request,$id)
+    {
+        $tournament = tournament::find($id);
+        if ($tournament) {
+            $response = [];
+            $tournament->name = $request->name ?? $tournament->name ;  // Title
+            $tournament->venue = $request->venue ?? $tournament->venue; // vanue
+            $tournament->country = $request->country??$tournament->country;// country
+            $tournament->state = $request->state?? $tournament->state ;//state
+            $tournament->date = $request->date?? $tournament->date; //start_date
+            $tournament->start_time = $request->start_time?? $tournament->start_time; //start_time
+            $tournament->end_date = $request->end_date??$tournament->end_date;//end_date
+            $tournament->end_time = $request->end_time??$tournament->end_time; //end_time
+            $tournament->repeat = $request->repeat??$tournament->repeat;// repeat
+            $tournament->category = $request->category??$tournament->category;//category
+            $tournament->format = $request->format??$tournament->format;//format
+            $tournament->description = $request->description??$tournament->description; //additional information
+            $tournament->host_id = $request->host_id?? $tournament->host_id; //host_id
+            $host = host::find($tournament->host_id);
+            $tournament->host_name = $host->name ?? $tournament->host_name;
+            $tournament->status = $request->status?? $tournament->status;
 
+            $tournament->save();
+            $response['tournament'] = $tournament;
+            $response['success'] = 1;
+            $response["message"]= "Tournament fetched Successfully";
+        } else {
+            $response['success'] = 0;
+            $response["message"]= "Tournament Not Found";
+        }
+        return json_encode($response);
     }
 
+
+    public function delete_tournament($id)
+    {
+        $response = [];
+        $tournament = tournament::find($id);
+        if ($tournament) {
+            $Result = $tournament->delete();
+            if ($Result) {
+                $response['success'] = 1;
+                $response["message"]= "Tournament delete successfull";
+                return json_encode($response);
+            } else {
+                $response['success'] = 0;
+                $response["message"]= "Tournament delete Failed";
+                return json_encode($response);
+            }
+        } else {
+            $response['success'] = 0;
+            $response["message"]= "No tournament Found";
+            return json_encode($response);
+        }
+    }
 
 
     public function host_tournament($id)
